@@ -13,6 +13,38 @@ was one more thing to keep in step.
 **When to change it:** A second coding agent becomes necessary. Then add its files
 beside these, not a layer below them.
 
+## The main session builds one issue per run
+
+The `build` skill runs in the main session. It takes one issue from its number to a
+pull request with the label `ready-for-human`. Without a number, it picks the next
+issue.
+
+**Why:** The user sees every agent while it works and answers a question in the chat.
+Nothing waits in the background, and nothing polls.
+**When to change it:** One issue at a time is too slow. Then open one session per
+issue. Each session is independent.
+
+## The state lives on GitHub and in the worktree
+
+The labels of the issue and one `**build:**` comment per stop hold the state of a
+build. `.work/plan.md` in the worktree holds the session state: behaviours, contract,
+rulings, and handoff.
+
+**Why:** The state survives the end of a session, and the user can read it. A later
+run continues from the labels and the comments. No script keeps a log.
+**When to change it:** A project uses another forge. Then the skills need its
+commands.
+
+## Agents are continued, not restarted
+
+The `build` skill starts the tester and the implementer once per run and continues
+them with `SendMessage`, for disputes, challenges, and fix rounds.
+
+**Why:** An agent keeps its context. A dispute or a fix round does not start from
+zero.
+**Costs:** An agent ends with the run that started it. A later run takes over the
+branch with fresh agents. `.work/plan.md` carries the state across.
+
 ## The implementer gets its own worktree
 
 The implementer has `isolation: worktree`. The WorktreeCreate hook creates its
@@ -80,6 +112,17 @@ increment.
 judge removes the noise, so that the implementer does not fix false positives. The cap
 stops an endless loop.
 **When to change it:** Real defects reach the user below the threshold. Then lower it.
+
+## One change after a merge
+
+After each merge, the `retro` skill asks for each finding: would a fresh session make
+the same mistake again? At most one change follows: a rule, a check line, a step, or
+a check script.
+
+**Why:** Lessons stay in the files that the next session reads. One change at a time
+keeps the files small. Zero changes is the common result.
+**When to change it:** The same finding comes back after a retro. Then the change was
+in the wrong file.
 
 ## The main checkout in a project folder
 
