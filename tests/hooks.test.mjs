@@ -99,3 +99,23 @@ test("a worktree without own commits is removed, one with commits stays", () => 
   assert.equal(hook("worktree-remove.mjs", { cwd: p.main, worktree_path: busy }).status, 1);
   assert.ok(existsSync(busy));
 });
+
+test("the implementer cannot stop with an open behaviour, and can after three refusals", () => {
+  const p = project();
+  const dir = worktree(p, "agent-a5");
+  const bin = mkdtempSync(path.join(os.tmpdir(), "yaw-gh-"));
+  writeFileSync(path.join(bin, "gh"), "#!/bin/sh\necho 1\n");
+  chmodSync(path.join(bin, "gh"), 0o755);
+  const env = { PATH: `${bin}${path.delimiter}${process.env.PATH}` };
+  const stop = (agent = "implementer") => hook("subagent-stop.mjs", { cwd: dir, agent_type: agent, agent_id: "a5" }, { env }).stdout;
+  const plan = path.join(dir, ".work", "plan.md");
+  writeFileSync(plan, "# Plan\n\n## Behaviours\n\n- [ ] it does a\n\n## Handoff\n\n- …\n");
+  assert.equal(stop("tester"), "");
+  assert.match(stop(), /"block"/);
+  assert.match(stop(), /"block"/);
+  assert.match(stop(), /systemMessage/);
+  writeFileSync(plan, "# Plan\n\n## Behaviours\n\n- [ ] it does a\n\n## Handoff\n\n- Awaiting: tests\n");
+  assert.equal(stop(), "");
+  writeFileSync(plan, "# Plan\n\n## Behaviours\n\n- [x] it does a\n\n## Handoff\n\n- …\n");
+  assert.equal(stop(), "");
+});

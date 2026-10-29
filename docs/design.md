@@ -30,6 +30,24 @@ name that Claude Code gives, for example `agent-<id>`.
 commands. Or Claude Code passes the prompt of the agent to the hook, and the hook no
 longer needs the transcript.
 
+## Hooks enforce the rules that matter most
+
+Two hooks in `.claude/settings.json` guard the work of the agents. The input of a hook
+names the agent that acts (`agent_type`), and the script decides by it:
+
+- A PreToolUse hook keeps the implementer away from the test files and the tester
+  inside them. The user's own session is not checked.
+- A SubagentStop hook refuses "done" for the implementer while a behaviour is open, a
+  change is not committed, or the branch has no pull request. After three refusals,
+  the agent can end anyway.
+
+**Why:** A rule that an agent can skip is a suggestion. The test files decide whether
+the work is correct, so their author must not be the implementer. The hooks are in the
+settings, because hooks in the front matter of an agent did not run in a test with
+`claude -p`.
+**When to change it:** A hook blocks correct work again and again. Then fix the hook,
+not the agent.
+
 ## The tester and the implementer are different agents
 
 The tester writes the red suite from the behaviours of the issue. The implementer
@@ -39,6 +57,17 @@ tester settles.
 **Why:** With one author, the test drifts to whatever the code does.
 **When to change it:** Never in the workflow. In a session of your own, the rule
 holds in spirit.
+
+## Rulings instead of questions
+
+The implementer decides an open question itself, after a `challenger` objects to the
+ruling. The ruling goes into the pull request. Only a destructive action, a security
+choice, or an effect outside the worktree stops the run for the user.
+
+**Why:** Every question to the user stops the work. A challenged ruling is visible,
+reversible, and has a known cost.
+**When to change it:** The user often reverts rulings in review. Then the issues are
+not clear enough. Fix `write-issue`, not the challenger.
 
 ## The main checkout in a project folder
 

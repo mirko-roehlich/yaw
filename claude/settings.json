@@ -61,6 +61,16 @@
           }
         ]
       }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/subagent-stop.mjs\""
+          }
+        ]
+      }
     ]
   }
 }
