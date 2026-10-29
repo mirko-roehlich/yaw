@@ -119,3 +119,20 @@ test("the implementer cannot stop with an open behaviour, and can after three re
   writeFileSync(plan, "# Plan\n\n## Behaviours\n\n- [x] it does a\n\n## Handoff\n\n- …\n");
   assert.equal(stop(), "");
 });
+
+test("the review places a finding on a diff line inline, and one outside the diff in the body", () => {
+  const dir = realpathSync(mkdtempSync(path.join(os.tmpdir(), "yaw-review-")));
+  mkdirSync(path.join(dir, ".work", "review", "7"), { recursive: true });
+  const finding = (line, confidence) => ({ reviewer: "reviewer-code", file: "src/a.mjs", line, severity: "major", claim: "c", failure_scenario: "f", confidence, kind: "code" });
+  writeFileSync(path.join(dir, ".work", "review", "7", "judged.json"), JSON.stringify([finding(2, 90), finding(40, 80), finding(3, 10)]));
+  const bin = mkdtempSync(path.join(os.tmpdir(), "yaw-gh-"));
+  writeFileSync(path.join(bin, "gh"), "#!/bin/sh\nprintf '+++ b/src/a.mjs\\n@@ -1,1 +1,3 @@\\n a\\n+b\\n+c\\n'\n");
+  chmodSync(path.join(bin, "gh"), 0o755);
+  const script = path.join(import.meta.dirname, "..", "claude", "skills", "review-pr", "post-review.mjs");
+  const r = spawnSync("node", [script, "7", "--dry-run"], { cwd: dir, encoding: "utf8", env: { ...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH}` } });
+  assert.equal(r.status, 0, r.stderr);
+  const payload = JSON.parse(r.stdout);
+  assert.deepEqual(payload.comments.map((c) => c.line), [2]);
+  assert.match(payload.body, /src\/a\.mjs:40/);
+  assert.match(payload.body, /1 below, not shown/);
+});

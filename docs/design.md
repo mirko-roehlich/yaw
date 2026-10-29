@@ -69,6 +69,18 @@ reversible, and has a known cost.
 **When to change it:** The user often reverts rulings in review. Then the issues are
 not clear enough. Fix `write-issue`, not the challenger.
 
+## A review panel and a judge
+
+Fresh, read-only reviewers read the pull request: the spec reviewer, the code
+reviewer, and one reviewer per area of the project. The judge scores each finding from
+0 to 100. Only findings at 70 or more go back to the implementer. Two review rounds per
+increment.
+
+**Why:** A reviewer that did not write the code sees what the author does not. The
+judge removes the noise, so that the implementer does not fix false positives. The cap
+stops an endless loop.
+**When to change it:** Real defects reach the user below the threshold. Then lower it.
+
 ## The main checkout in a project folder
 
 The main checkout is `<project>/main`. Each worktree is a sibling folder. The settings
