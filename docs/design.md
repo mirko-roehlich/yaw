@@ -146,6 +146,14 @@ protects what matters, and the user merges.
 **When to change it:** An agent does something that the fence should stop. Then add a
 deny rule.
 
+## One home per artifact
+
+Each artifact has exactly one home, and every other file links to it. `CLAUDE.md` has
+the table.
+
+**Why:** A copy drifts.
+**When to change it:** Never.
+
 ## MIT license
 
 YAW is MIT. Adoption copies `LICENSE` into the project. The vendored `simple-english`

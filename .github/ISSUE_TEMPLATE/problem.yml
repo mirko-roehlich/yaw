@@ -1,0 +1,35 @@
+name: Problem
+description: YAW did something wrong, or the adoption failed.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The stage, the agent or skill, and what it did.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The comment on the issue, a hook message, or the error. Remove anything private.
+      render: text
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: The output of `claude --version` and `node --version`, and your OS.
+    validations:
+      required: true
+  - type: input
+    id: adopted
+    attributes:
+      label: Adoption
+      description: When you adopted YAW, and whether you changed the YAW files since.
