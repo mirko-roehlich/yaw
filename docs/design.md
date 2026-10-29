@@ -30,6 +30,16 @@ name that Claude Code gives, for example `agent-<id>`.
 commands. Or Claude Code passes the prompt of the agent to the hook, and the hook no
 longer needs the transcript.
 
+## The tester and the implementer are different agents
+
+The tester writes the red suite from the behaviours of the issue. The implementer
+makes it pass. A test that the implementer thinks is wrong is a dispute that the
+tester settles.
+
+**Why:** With one author, the test drifts to whatever the code does.
+**When to change it:** Never in the workflow. In a session of your own, the rule
+holds in spirit.
+
 ## The main checkout in a project folder
 
 The main checkout is `<project>/main`. Each worktree is a sibling folder. The settings

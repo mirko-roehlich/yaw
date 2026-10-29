@@ -5,6 +5,7 @@ import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSy
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
+import { globToRegExp } from "../claude/hooks/lib.mjs";
 
 const hooks = path.join(import.meta.dirname, "..", "claude", "hooks");
 const git = (cwd, ...args) => execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
@@ -37,6 +38,14 @@ function worktree(p, name) {
   return r.stdout.split("\n").at(-1);
 }
 
+test("a glob matches across folders with ** and inside one name with *", () => {
+  assert.ok(globToRegExp("**/*.test.ts").test("a.test.ts"));
+  assert.ok(globToRegExp("**/*.test.ts").test("src/a/b.test.ts"));
+  assert.ok(!globToRegExp("**/*.test.ts").test("src/a.ts"));
+  assert.ok(globToRegExp("e2e/**").test("e2e/x/y.ts"));
+  assert.ok(!globToRegExp("*.md").test("docs/a.md"));
+});
+
 test("the worktree goes beside the main checkout, with the plan and the shared memory", () => {
   const p = project({ setup: "mkdir -p .work && touch .work/setup-ran" });
   const dir = worktree(p, "agent-1");
@@ -64,6 +73,18 @@ test("the worktree of an agent for an issue is named after the issue", () => {
 test("a worktree name that is not a kebab-case slug is refused", () => {
   const p = project();
   assert.equal(hook("worktree-create.mjs", { name: "Bad Name", cwd: p.main }).status, 1);
+});
+
+test("the implementer cannot edit a test, the tester only tests and .work/, the user anything", () => {
+  const p = project();
+  const dir = worktree(p, "agent-2");
+  const edit = (file, agent) => hook("test-paths.mjs", { cwd: p.main, agent_type: agent, tool_input: { file_path: path.join(dir, file) } }).stdout;
+  assert.match(edit("src/a.test.mjs", "implementer"), /"deny"/);
+  assert.equal(edit("src/a.mjs", "implementer"), "");
+  assert.match(edit("src/a.mjs", "tester"), /"deny"/);
+  assert.equal(edit("e2e/flow.mjs", "yaw-tester"), "");
+  assert.equal(edit(".work/plan.md", "tester"), "");
+  assert.equal(edit("src/a.test.mjs", undefined), "");
 });
 
 test("a worktree without own commits is removed, one with commits stays", () => {
