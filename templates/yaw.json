@@ -1,0 +1,4 @@
+{
+  "testPaths": ["<glob of the test files, for example **/*.test.ts>", "<glob of the fixtures and test helpers>"],
+  "setup": "<the command that prepares a new worktree, for example pnpm install --frozen-lockfile, or null>"
+}

@@ -1,0 +1,80 @@
+// Tests of the hooks in claude/hooks/. Run them with: node --test tests/
+import assert from "node:assert/strict";
+import { execFileSync, spawnSync } from "node:child_process";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { test } from "node:test";
+
+const hooks = path.join(import.meta.dirname, "..", "claude", "hooks");
+const git = (cwd, ...args) => execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+
+// A project folder with a bare origin, the main checkout in main/, and .claude/yaw.json.
+function project({ setup = null } = {}) {
+  const root = realpathSync(mkdtempSync(path.join(os.tmpdir(), "yaw-test-")));
+  const main = path.join(root, "main");
+  execFileSync("git", ["init", "-q", "--bare", "-b", "main", path.join(root, "origin.git")]);
+  execFileSync("git", ["clone", "-q", path.join(root, "origin.git"), main], { stdio: "ignore" });
+  git(main, "config", "user.email", "test@example.com");
+  git(main, "config", "user.name", "Test");
+  mkdirSync(path.join(main, ".claude"));
+  writeFileSync(path.join(main, ".claude", "yaw.json"), JSON.stringify({ testPaths: ["**/*.test.mjs", "e2e/**"], setup }));
+  writeFileSync(path.join(main, "README.md"), "test\n");
+  git(main, "add", "README.md");
+  git(main, "commit", "-q", "-m", "init");
+  git(main, "push", "-q", "origin", "main");
+  return { root, main };
+}
+
+function hook(name, input, { args = [], env = {} } = {}) {
+  const r = spawnSync("node", [path.join(hooks, name), ...args], { input: JSON.stringify(input), encoding: "utf8", env: { ...process.env, ...env } });
+  return { status: r.status, stdout: r.stdout.trim(), stderr: r.stderr.trim() };
+}
+
+function worktree(p, name) {
+  const r = hook("worktree-create.mjs", { name, cwd: p.main });
+  assert.equal(r.status, 0, r.stderr);
+  return r.stdout.split("\n").at(-1);
+}
+
+test("the worktree goes beside the main checkout, with the plan and the shared memory", () => {
+  const p = project({ setup: "mkdir -p .work && touch .work/setup-ran" });
+  const dir = worktree(p, "agent-1");
+  assert.equal(dir, path.join(p.root, "agent-1"));
+  assert.equal(git(dir, "branch", "--show-current"), "agent-1");
+  assert.ok(existsSync(path.join(dir, ".work", "plan.md")));
+  assert.ok(existsSync(path.join(dir, ".work", "setup-ran")));
+  const local = JSON.parse(readFileSync(path.join(dir, ".claude", "settings.local.json"), "utf8"));
+  assert.ok(local.autoMemoryDirectory.endsWith(`${p.main.replace(/[^a-zA-Z0-9]/g, "-")}${path.sep}memory`));
+  assert.equal(git(dir, "status", "--porcelain"), "");
+});
+
+test("the worktree of an agent for an issue is named after the issue", () => {
+  const p = project();
+  const transcript = path.join(p.root, "transcript.jsonl");
+  const call = (prompt) => JSON.stringify({ type: "assistant", message: { content: [{ type: "tool_use", name: "Agent", input: { subagent_type: "implementer", prompt } }] } });
+  writeFileSync(transcript, `${call("Invoke the implement-issue skill for #7.")}\n`);
+  const create = () => hook("worktree-create.mjs", { name: "agent-x1", cwd: p.main, transcript_path: transcript }).stdout.split("\n").at(-1);
+  assert.equal(create(), path.join(p.root, "issue-7"));
+  assert.equal(create(), path.join(p.root, "issue-7-2"));
+  writeFileSync(transcript, `${call("Run pwd.")}\n`);
+  assert.equal(create(), path.join(p.root, "agent-x1"));
+});
+
+test("a worktree name that is not a kebab-case slug is refused", () => {
+  const p = project();
+  assert.equal(hook("worktree-create.mjs", { name: "Bad Name", cwd: p.main }).status, 1);
+});
+
+test("a worktree without own commits is removed, one with commits stays", () => {
+  const p = project();
+  const empty = worktree(p, "agent-3");
+  assert.equal(hook("worktree-remove.mjs", { cwd: p.main, worktree_path: empty }).status, 0);
+  assert.ok(!existsSync(empty));
+  const busy = worktree(p, "agent-4");
+  writeFileSync(path.join(busy, "a.txt"), "a");
+  git(busy, "add", "a.txt");
+  git(busy, "commit", "-q", "-m", "a");
+  assert.equal(hook("worktree-remove.mjs", { cwd: p.main, worktree_path: busy }).status, 1);
+  assert.ok(existsSync(busy));
+});

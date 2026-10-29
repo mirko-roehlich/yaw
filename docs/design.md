@@ -13,6 +13,34 @@ was one more thing to keep in step.
 **When to change it:** A second coding agent becomes necessary. Then add its files
 beside these, not a layer below them.
 
+## The implementer gets its own worktree
+
+The implementer has `isolation: worktree`. The WorktreeCreate hook creates its
+worktree beside the main checkout. The other agents work from the main checkout with
+absolute paths: `git -C <worktree>` for git, `cd <worktree> &&` for other commands.
+
+**Why:** The shell of a subagent starts in its own folder for every command. A `cd`
+does not stay between two commands. Claude Code asks before git runs after a `cd`,
+also with an allow rule. With isolation, the implementer starts in its worktree.
+The hook names the folder `issue-<n>` after the issue in the prompt of the agent. It
+finds the prompt in the transcript of the session. If it finds no issue, it keeps the
+name that Claude Code gives, for example `agent-<id>`.
+
+**When to change it:** Claude Code keeps the working folder of a subagent between
+commands. Or Claude Code passes the prompt of the agent to the hook, and the hook no
+longer needs the transcript.
+
+## The main checkout in a project folder
+
+The main checkout is `<project>/main`. Each worktree is a sibling folder. The settings
+give every session the project folder as a working directory
+(`additionalDirectories: [".."]`).
+
+**Why:** Adoption does not have to convert the repository. The agents reach the
+worktrees and nothing else.
+**When to change it:** A project already has another layout. Then change the hooks
+and the `worktree` skill.
+
 ## A broad allow list behind a deny fence
 
 The settings allow git, `gh`, and the commands of the gates. A deny list fences off

@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(cd *)",
       "Bash(git *)",
       "Bash(gh *)",
       "Bash(node .claude/*)",
@@ -24,6 +25,31 @@
       "Bash(gh api -X DELETE *)",
       "Bash(gh api --method DELETE *)",
       "Edit(.env*)"
+    ],
+    "additionalDirectories": [
+      ".."
+    ]
+  },
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/worktree-create.mjs\""
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/worktree-remove.mjs\""
+          }
+        ]
+      }
     ]
   }
 }
