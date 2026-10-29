@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(node .claude/*)",
+      "Bash(node \"$CLAUDE_PROJECT_DIR/.claude/*)"
+    ],
+    "deny": [
+      "Bash(git push --no-verify*)",
+      "Bash(git push * --no-verify*)",
+      "Bash(git commit * --no-verify*)",
+      "Bash(git push * main*)",
+      "Bash(git push * +main*)",
+      "Bash(git push * :main*)",
+      "Bash(git -C * push * main*)",
+      "Bash(git push * --delete main*)",
+      "Bash(git branch -D main*)",
+      "Bash(git branch -d main*)",
+      "Bash(git worktree remove --force*)",
+      "Bash(gh pr merge *)",
+      "Bash(gh pr review *)",
+      "Bash(gh repo delete*)",
+      "Bash(gh api -X DELETE *)",
+      "Bash(gh api --method DELETE *)",
+      "Edit(.env*)"
+    ]
+  }
+}
