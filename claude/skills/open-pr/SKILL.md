@@ -38,7 +38,8 @@ argument-hint: <issue-number>
 5. `gh pr checks --watch`. A red check: fix it on the branch, commit, push, and watch
    again. Do not report done with a red check. If a check died within seconds, before
    any gate ran, the cause is the infrastructure, not the code. Report it as such and
-   continue, because the `gates` skill ran green here.
+   continue, because the `gates` skill ran green here. If the branch has no checks,
+   the repository has no CI. Report that and continue.
 6. Report the pull request URL and the results of the checks.
 
 ## Rules

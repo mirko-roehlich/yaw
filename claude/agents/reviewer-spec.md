@@ -3,7 +3,7 @@ name: reviewer-spec
 description: Read-only reviewer of a pull request for scope and test evidence. Every acceptance behaviour has a test, nothing out of scope was built, tests changed only in the tester's commits, every production commit answers a red test. The review-pr skill starts it. Returns findings as JSON.
 tools: Read, Grep, Glob, Bash
 permissionMode: plan
-model: sonnet
+model: opus
 effort: high
 maxTurns: 60
 ---

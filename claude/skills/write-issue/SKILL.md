@@ -20,8 +20,9 @@ An issue that needs more is two issues.
 
 1. **Read.** The source: the request, the issue, or the document sections. Read the
    glossary and the flows that it touches, and `.github/ISSUE_TEMPLATE/issue.md`.
-2. **Scout.** Start the `scout` agent with the topic. Read what it names, so that the
-   issues build on what exists and do not specify covered behaviour again.
+2. **Look.** Find the documents, the code, and the tests that bind the topic
+   yourself, with Grep, Glob, and Read. Read what you find, so that the issues build on
+   what exists and do not specify covered behaviour again.
 3. **Draft** each issue to `.work/issues/<k>.md` in the shape of the template: Goal,
    Follows, Acceptance behaviours, Out of scope, Depends on. The title says what the
    user can do afterwards. Order the issues by dependency. An issue depends only on

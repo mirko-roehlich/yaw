@@ -20,7 +20,9 @@ pull request with the label `ready-for-human`. Without a number, it picks the ne
 issue.
 
 **Why:** The user sees every agent while it works and answers a question in the chat.
-Nothing waits in the background, and nothing polls.
+Nothing waits in the background, and nothing polls. The main session coordinates and
+never implements, so that the agent that writes the code does not decide when the work
+is done.
 **When to change it:** One issue at a time is too slow. Then open one session per
 issue. Each session is independent.
 
@@ -44,6 +46,9 @@ them with `SendMessage`, for disputes, challenges, and fix rounds.
 zero.
 **Costs:** An agent ends with the run that started it. A later run takes over the
 branch with fresh agents. `.work/plan.md` carries the state across.
+**When to change it:** The context of an agent fills up before the run ends, because
+the issues are large. Then start a fresh implementer per fix round, and let
+`.work/plan.md` carry the state.
 
 ## The implementer gets its own worktree
 
