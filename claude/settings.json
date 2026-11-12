@@ -24,7 +24,11 @@
       "Bash(gh repo delete*)",
       "Bash(gh api -X DELETE *)",
       "Bash(gh api --method DELETE *)",
-      "Edit(.env*)"
+      "Bash(gh api * merge*)",
+      "Bash(gh api * APPROVE*)",
+      "Bash(gh api * REQUEST_CHANGES*)",
+      "Edit(.env*)",
+      "Write(.env*)"
     ],
     "additionalDirectories": [
       ".."

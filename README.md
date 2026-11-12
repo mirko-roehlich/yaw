@@ -38,7 +38,7 @@ project:
   to a pull request, and `retro` learns from a merged pull request.
 - **Skills the agents use:** `implement-issue`, `tdd`, `gates`, `open-pr`,
   `review-pr`, `handoff`, `worktree`, and `simple-english` for the writing.
-- **Agents:** seven agents, listed in [Agents](#agents).
+- **Agents:** six agents, listed in [Agents](#agents).
 - **Hooks:** they create and remove the worktrees, keep each agent in its own files,
   and refuse "done" while the work is open.
 - **Rules:** test-driven work, the pull request workflow, and writing.
@@ -139,7 +139,6 @@ steps are in [Remove YAW](ADOPT.md#remove-yaw).
 | [reviewer-spec](claude/agents/reviewer-spec.md) | Checks scope and test evidence against the issue. |
 | [reviewer-code](claude/agents/reviewer-code.md) | Checks correctness and the rules of the repository. |
 | [judge](claude/agents/judge.md) | Scores each review finding from 0 to 100. |
-| [scout](claude/agents/scout.md) | Finds the files and documents that bind a topic. |
 
 Adoption adds one reviewer per area of your project, for example security, from
 [`templates/reviewer-area.md`](templates/reviewer-area.md).

@@ -3,8 +3,8 @@ name: judge
 description: Scores the findings of the review panel before the review-pr skill posts them. Checks each claim against the diff and the rules, and returns the findings with a confidence from 0 to 100. Read-only.
 tools: Read, Grep, Glob, Bash
 permissionMode: plan
-model: sonnet
-effort: medium
+model: opus
+effort: high
 maxTurns: 60
 ---
 
